@@ -12,9 +12,10 @@ import {
     MenuItem,
     IconButton,
     Typography,
-    Snackbar
+    Link
 } from "@mui/material";
 import LoginComponent from "./components/LoginComponent";
+import MainpageComponent from "./components/MainpageComponent";
 
 const Footer = () => {
     return (
@@ -28,43 +29,55 @@ const Footer = () => {
     );
 };
 
-const App = () => {
+
+const styles = {
+    toolbar: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center'
+    },
+    typography: {
+        marginRight: '5rem'
+    }
+  };
+  
+  const App = () => {
     const [anchorEl, setAnchorEl] = useState(null);
-    const [contactServer, setContactServer] = useState(false);
-    const [snackBarMsg, setSnackBarMsg] = useState("");
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
+  
     const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
+      setAnchorEl(event.currentTarget);
     };
-
-    const snackbarClose = async (event, reason) => {
-        if (reason === "clickaway") {
-          return;
-      }     
-        setContactServer(false);
+  
+    const handleClose = () => {
+      setAnchorEl(null);
     };
-
+  
     return (
-        <ThemeProvider theme={theme}>
+      <ThemeProvider theme={theme}>
             <AppBar>
-                <Toolbar>
-                    <Typography variant="h6" color="inherit" textAlign={"left"} style={{fontSize:27}}>
-                        <FontAwesomeIcon icon={faHandshake} /> sprinTCompass
+                <Toolbar style={styles.toolbar}>
+
+                    <Typography component={NavLink} to="/" variant="h6" color="inherit" textAlign={"left"} style={{fontSize:27, ...styles.typography}}>
+                        <FontAwesomeIcon  icon={faHandshake} /> sprinTCompass
                     </Typography>
+   
+                    <div className="menu-items">
+                        <MenuItem component={NavLink} to="/home">
+                        Home
+                        </MenuItem>
+                        <MenuItem component={NavLink} to="/login">
+                        Login
+                        </MenuItem>
+                    </div>
 
                     <IconButton
                         id="menubtn"
                         onClick={handleClick}
                         color="inherit"
-                        style={{ marginLeft: "auto", paddingRight: "1vh" }}
                     >
                         <MenuIcon />
                     </IconButton>
-                    
+
                     <Menu
                         id="simple-menu"
                         anchorEl={anchorEl}
@@ -72,23 +85,23 @@ const App = () => {
                         onClose={handleClose}
                     >
                         <MenuItem component={NavLink} to="/home" onClick={handleClose}>
-                            Home
+                        Home
                         </MenuItem>
                         <MenuItem component={NavLink} to="/login" onClick={handleClose}>
-                            Reset Data
+                        Login
                         </MenuItem>
                     </Menu>
                 </Toolbar>
-            </AppBar>
-
-            <Routes>
-                <Route path="/" element={<LoginComponent />} />
-                <Route path="/home" element={<LoginComponent />} />
-                <Route path="/login" element={<LoginComponent />} />
-            </Routes>
-            <Footer />
-        </ThemeProvider>
+        </AppBar>
+        <Routes>
+          <Route path="/" element={<MainpageComponent />} />
+          <Route path="/home" element={<MainpageComponent />} />
+          <Route path="/login" element={<LoginComponent />} />
+        </Routes>
+  
+        <Footer />
+      </ThemeProvider>
     );
 };
-
+  
 export default App;

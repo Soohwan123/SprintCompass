@@ -10,6 +10,7 @@ import { Card,
 } from "@mui/material";
 
 import "../App.css";
+
 const LoginComponent = () => {
     return (
         <ThemeProvider theme={theme}>

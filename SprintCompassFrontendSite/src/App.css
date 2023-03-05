@@ -1,3 +1,99 @@
+@media (min-width: 960px) {
+  .menu-items {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-right: auto;
+  }
+
+  .main-div{
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    overflow-Y: auto;
+    height: auto;
+  }
+
+  .left-card{
+    margin-top: 5vh;
+    width: 15vw;
+    height: 80vh;
+    position: absolute;
+    left: 20;
+    top: 5%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2),
+  }
+
+  .right-card{
+    margin-top: 5vh;
+    width: 15vw;
+    height: 80vh;
+    position: absolute;
+    right: 20;
+    top: 5%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2),
+  }
+
+  .main-card{
+    margin-top: 5vh;
+    width: 65vw;
+    height: 80vh;
+    position: absolute;
+    left: 50%;
+    top: 45%;
+    transform: translate(-50%, -50%);
+    min-width: 350;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2),
+  }
+
+  #menubtn {
+    display: none;
+  }
+}
+
+@media (max-width: 959px) {
+  .menu-items {
+    display: none;
+  }
+
+  #menubtn {
+    display: block;
+  }
+  .main-div{
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    overflow-Y: auto;
+    height: auto;
+  }
+  .left-card{
+    width: 65vw;
+    height: auto;
+    position: relative;
+    margin: 10px 0;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2),
+  }
+
+  .right-card{
+    width: 65vw;
+    height: auto;
+    position: relative;
+    margin: 10px 0;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2),
+  }
+
+  .main-card{
+    width: 65vw;
+    height: auto;
+    position: relative;
+    margin: 10px 0;
+    transform: translate(-50%, -50%);
+    min-width: 350;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2),
+  }
+}
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -34,7 +130,6 @@ body {
 }
 .card {
   margin-top: 5vh;
-  width: 335px;
 }
 
 .cardBody {
