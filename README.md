@@ -6,5 +6,5 @@ This application can be used by project managers to track the progress of a proj
 
 # HOW TO TEST
 
---Get into /SprintCompassBackend and type 'node gqlapp' in the terminal in order to start the server. <br>
---Get into /SprintCompassFrontendSite and type 'npm run dev' in the terminal in order to start the client site.
+--Get into /SprintCompassBackend and type <strong>node gqlapp</strong> in the terminal in order to start the server. <br>
+--Get into /SprintCompassFrontendSite and type <strong>npm run dev</strong> in the terminal in order to start the client site.
