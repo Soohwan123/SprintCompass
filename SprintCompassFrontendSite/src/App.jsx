@@ -62,10 +62,10 @@ const styles = {
                     </Typography>
    
                     <div className="menu-items">
-                        <MenuItem component={NavLink} to="/home">
+                        <MenuItem style={{fontWeight: 'bold'}} component={NavLink} to="/home">
                         Home
                         </MenuItem>
-                        <MenuItem component={NavLink} to="/login">
+                        <MenuItem style={{fontWeight: 'bold'}} component={NavLink} to="/login">
                         Login
                         </MenuItem>
                     </div>

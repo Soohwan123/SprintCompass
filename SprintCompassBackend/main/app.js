@@ -1,19 +1,18 @@
-"use strict";
-import * as cfg from "./config.js";
+import { port } from "./config.js";
+import { routes } from "./fastify_routes.js";
 import Fastify from "fastify";
-import mercurius from "mercurius";
-import cors from "@fastify/cors";
-import { schema } from "./schema.js";
-import { resolvers } from "./resolvers.js";
 
-const app = Fastify();
-
-app.register(cors, {});
-
-app.register(mercurius, {
-    schema,
-    resolvers,
-    graphiql: true, // web page for to test queries
+const fastify = Fastify({
+    logger: true,
 });
 
-app.listen({ port: cfg.port });
+// register the route module
+fastify.register(routes);
+
+// start the fastify server
+fastify.listen(port, (err, address) => {
+    if (err) {
+        fastify.log.error(err);
+        process.exit(1);
+    }
+});
