@@ -3,19 +3,16 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faHandshake, faPlus  } from '@fortawesome/free-solid-svg-icons'
 import { ThemeProvider } from "@mui/material/styles";
 import { toast } from 'react-toastify';
-import { Routes, Route, NavLink } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
+import { useHistory  } from "react-router-dom";
 import 'react-toastify/dist/ReactToastify.css';
 
 import { v4 as uuidv4 } from 'uuid';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableHead from '@mui/material/TableHead';
 import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
 import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
 
 import theme from "../theme";
 import customFetch from "../utilities/utility"
@@ -149,8 +146,10 @@ const MainpageComponent = () => {
         setDescription(e.target.value);
     };
 
+    const history = useHistory();
+
     const handleRowClick = (project) => {
-        //TODO -- render info in the middle Card
+        history.push(`/project/${project.Key}`, { project });
     };
 
 
@@ -225,7 +224,7 @@ const MainpageComponent = () => {
                                         <TableRow           
                                             key={project.Key}
                                             onClick={() => handleRowClick(project)}
-                                            hover={true}
+                                            hover
                                         >
                                             <TableCell style={{ fontSize: 12, fontFamily: 'Roboto, sans-serif'}}>
                                                 {project.ProjectName}

@@ -2,6 +2,7 @@ const schema = `
 type Query {
     getallusers : [User],
     getuser(UniqueID: String) : User,
+    getallprojects : [Project],
 }
 
 type Mutation {

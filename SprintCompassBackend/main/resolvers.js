@@ -7,6 +7,10 @@ const resolvers = {
         let db = await dbRtns.getDBInstance();
         return await dbRtns.findAll(db, cfg.usersCollection, {}, {});
     },
+    getallprojects: async () => {
+        let db = await dbRtns.getDBInstance();
+        return await dbRtns.findAll(db, cfg.projectsCollection, {}, {});
+    },
     getuser: async (args) => {
         let db = await dbRtns.getDBInstance();
         return await dbRtns.findOne(db, cfg.usersCollection, { UniqueID: args });
