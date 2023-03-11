@@ -1,6 +1,7 @@
 import * as dbRtns from "./db_routines.js";
 import * as cfg from "./config.js";
 import moment from 'moment';
+import { ObjectId } from "mongodb";
 
 const resolvers = {
     getallusers: async () => {
@@ -14,6 +15,10 @@ const resolvers = {
     getuser: async (args) => {
         let db = await dbRtns.getDBInstance();
         return await dbRtns.findOne(db, cfg.usersCollection, { UniqueID: args });
+    },
+    getproject_users: async (args) => {
+        let db = await dbRtns.getDBInstance();
+        return await dbRtns.findAll(db, cfg.projects_usersCollection, { Project_id: ObjectId(args.Project_id) }, {});
     },
     adduser: async (args) => {
         let db = await dbRtns.getDBInstance();
@@ -39,5 +44,19 @@ const resolvers = {
         let results = await dbRtns.addOne(db, cfg.projectsCollection, project);
         return results.acknowledged ? project : null;  
     },
+    addproject_user: async (args) => {
+        let db = await dbRtns.getDBInstance();
+        let project_user = {
+            Project_id: ObjectId(args.Project_id),
+            User_id: ObjectId(args.User_id),
+            };
+        let results = await dbRtns.addOne(db, cfg.projects_usersCollection, project_user);
+        return results.acknowledged ? project_user : null;  
+    },
+    deleteproject_user: async (args) => {
+        let db = await dbRtns.getDBInstance();
+        let results = await dbRtns.deleteOne(db, cfg.projects_usersCollection, { _id: ObjectId(args._id) });
+        return results.acknowledged ? "DELETED" : null;
+    }
 };
 export { resolvers };
