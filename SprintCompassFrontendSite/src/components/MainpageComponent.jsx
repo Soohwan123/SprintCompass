@@ -378,7 +378,21 @@ const MainpageComponent = () => {
             boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
           }}
         >
-          <CardContent>Team Memeber List</CardContent>
+          <CardContent>            
+            <Typography
+              style={{
+                position: "absolute",
+                top: 10,
+                left: 20,
+                fontSize: 14,
+                fontFamily: "Roboto, sans-serif",
+                fontWeight: "bold",
+                color: "#C0C0C0",
+              }}
+            >
+              Team Member List
+            </Typography>
+            </CardContent>
           {showList && selectedProject !== "" && (<List
             sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
           >
