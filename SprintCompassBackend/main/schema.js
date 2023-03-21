@@ -4,6 +4,7 @@ type Query {
     getuser(UniqueID: String) : User,
     getallprojects : [Project],
     getproject_users(Project_id: String) : [Project_User],
+    getproject_tasks(Project_id: String) : [Task],
 }
 
 type Mutation {
@@ -32,6 +33,27 @@ type Mutation {
     deleteproject_user(
         _id: String
     ): String
+
+    addtask(
+        Project_id: String
+        TaskTitle: String
+        EstimatedCost: String
+        ActualCost: String
+        Description: String
+    ): Task
+
+    updatetask(
+        _id: String
+        Project_id: String
+        TaskTitle: String
+        EstimatedCost: String
+        ActualCost: String
+        Description: String
+    ): String
+
+    deletetask(
+        _id: String
+    ): String
 },
 
 type User {
@@ -57,6 +79,15 @@ type Project_User {
     _id: String
     Project_id: String
     User_id: String
+}
+
+type Task {
+    _id: String
+    Project_id: String
+    TaskTitle: String
+    EstimatedCost: String
+    ActualCost: String
+    Description: String
 }
   
 `;

@@ -25,6 +25,9 @@ import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
 import CommentIcon from "@mui/icons-material/Comment";
+import TaskIcon from "@mui/icons-material/Task";
+import AddTaskIcon from "@mui/icons-material/AddTask";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 import theme from "../theme";
 import customFetch from "../utilities/utility";
@@ -51,9 +54,10 @@ const MainpageComponent = () => {
   const [showList, setShowList] = useState([]);
 
   const [open, setOpen] = useState(false);
+  const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [saveButtonDisabled, setSaveButtonDisabled] = useState(true);
-  const [checked, setChecked] = React.useState([]);
+  const [taskActionBtnDisabled, setTaskActionBtnDisabled] = useState(true);
 
   const reducer = (state, newState) => ({ ...state, ...newState });
   const [state, setState] = useReducer(reducer, initialInfoState);
@@ -63,8 +67,17 @@ const MainpageComponent = () => {
   const [numOfSprints, setNumOfSprints] = useState("");
   const [description, setDescription] = useState("");
 
+  const [taskAction, setTaskAction] = useState("Add");
+  const [taskModalTitle, setTaskModalTitle] = useState("Add Task");
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskEstCost, setTaskEstCost] = useState("");
+  const [taskActCost, setTaskActCost] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
+
   const [selectedProject, setSelectedProject] = useState("");
+  const [selectedTask, setSelectedTask] = useState("");
   const [projectUsers, setProjectUsers] = useState([]);
+  const [projectTasks, setProjectTasks] = useState([]);
 
   useEffect(() => {
     LoadProjectList();
@@ -198,6 +211,37 @@ const MainpageComponent = () => {
     }
   };
 
+  const LoadProjectTaskList = async (Project_id) => {
+    try {
+      let tasks = [];
+      let newTasks = [];
+      //fetching data
+      let response = await customFetch(
+        `query { getproject_tasks(Project_id: "${Project_id}") {_id, Project_id, TaskTitle, EstimatedCost, ActualCost, Description}}`
+      );
+      let json = await response.json();
+
+      tasks = json.data.getproject_tasks;
+
+      tasks.map((t) => {
+        let newT = {
+          Key: t._id,
+          Project_id: t.Project_id,
+          TaskTitle: t.TaskTitle,
+          EstimatedCost: t.EstimatedCost,
+          ActualCost: t.ActualCost,
+          Description: t.Description,
+        };
+
+        newTasks.push(newT);
+      });
+
+      setProjectTasks(newTasks);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   // OnChange functions
   const ProjectNameTextFieldOnChange = (e, value) => {
     setProjectName(e.target.value);
@@ -221,33 +265,122 @@ const MainpageComponent = () => {
   };
 
   const DesTextFieldOnChange = (e, value) => {
-    setDescription(e.target.value);
+    setTaskTitle(e.target.value);
+  };
+
+  const taskTitletFieldOnChange = (e, value) => {
+    setTaskTitle(e.target.value);
+    setTaskActionBtnDisabled(false);
+  };
+
+  const taskEstCostTextFieldOnChange = (e, value) => {
+    setTaskEstCost(e.target.value);
+    setTaskActionBtnDisabled(false);
+  };
+
+  const taskActCostTextFieldOnChange = (e, value) => {
+    setTaskActCost(e.target.value);
+    setTaskActionBtnDisabled(false);
+  };
+
+  const taskDesTextFieldOnChange = (e, value) => {
+    setTaskDescription(e.target.value);
+    setTaskActionBtnDisabled(false);
   };
 
   const handleRowClick = (project) => {
     //TODO -- render info in the middle Card
     setSelectedProject(project.Key);
     LoadProjectUserList(project.Key);
+    LoadProjectTaskList(project.Key);
+  };
+
+  const addTaskOnClick = (e, value) => {
+    setSelectedTask("");
+    setTaskModalTitle("Add Task");
+    setTaskTitle("");
+    setTaskEstCost("");
+    setTaskActCost("");
+    setTaskDescription("");
+    setTaskAction("ADD");
+    setTaskActionBtnDisabled(true);
+    taskModalOnOpen();
+  };
+
+  const modTaskOnClick = (task) => () => {
+    setSelectedTask(task.Key);
+    setTaskModalTitle("Update Task");
+    setTaskTitle(task.TaskTitle);
+    setTaskEstCost(task.EstimatedCost);
+    setTaskActCost(task.ActualCost);
+    setTaskDescription(task.Description);
+    setTaskAction("SAVE");
+    setTaskActionBtnDisabled(true);
+    taskModalOnOpen();
+  };
+
+  const handleTaskModalAction = async () => {
+    taskModalOnClose();
+
+    try {
+      if (taskAction === "ADD") {
+        let response = await customFetch(`
+          mutation { addtask
+            (Project_id: "${selectedProject}", 
+             TaskTitle: "${taskTitle}",
+             EstimatedCost: "${taskEstCost}"
+             ActualCost: "${taskActCost}"
+             Description: "${taskDescription}") 
+            { Project_id, TaskTitle, EstimatedCost, ActualCost, Description } 
+          }`);
+      } else if (taskAction === "SAVE") {
+        let response = await customFetch(`
+          mutation { updatetask
+            (_id: "${selectedTask}"
+             Project_id: "${selectedProject}", 
+             TaskTitle: "${taskTitle}",
+             EstimatedCost: "${taskEstCost}"
+             ActualCost: "${taskActCost}"
+             Description: "${taskDescription}") 
+          }`);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
+    LoadProjectTaskList(selectedProject);
+  };
+
+  const deleteTaskOnClick = (task_id) => async () => {
+    try{
+      let response = await customFetch(
+        `mutation { deletetask(_id: "${task_id}") }`
+      );
+    } catch (error) {
+      console.log(error);
+    }
+
+    LoadProjectTaskList(selectedProject);
   };
 
   const handleToggle = (user_id) => async () => {
-    const currentPu = projectUsers.find(pu => pu.User_id === user_id);
+    const currentPu = projectUsers.find((pu) => pu.User_id === user_id);
 
-    if (currentPu === undefined) {
-      try {
+    try {
+      if (currentPu === undefined) {
         let response = await customFetch(`
-        mutation { addproject_user 
-          (Project_id: "${selectedProject}", 
-           User_id : "${user_id}") 
-          { Project_id, User_id } 
-        }`);
-      } catch (error) {
-        console.log(error);
+          mutation { addproject_user 
+            (Project_id: "${selectedProject}", 
+             User_id : "${user_id}") 
+            { Project_id, User_id } 
+          }`);
+      } else {
+        let response = await customFetch(
+          `mutation { deleteproject_user(_id: "${currentPu.Key}") }`
+        );
       }
-    } else {
-      let response = await customFetch(
-        `mutation { deleteproject_user(_id: "${currentPu.Key}") }`
-      );
+    } catch (error) {
+      console.log(error);
     }
 
     LoadProjectUserList(selectedProject);
@@ -268,6 +401,14 @@ const MainpageComponent = () => {
 
   const projectAddModalClose = () => {
     setOpen(false);
+  };
+
+  const taskModalOnOpen = () => {
+    setTaskModalOpen(true);
+  };
+
+  const taskModalOnClose = () => {
+    setTaskModalOpen(false);
   };
 
   return (
@@ -365,6 +506,49 @@ const MainpageComponent = () => {
             }}
           />
           <CardContent></CardContent>
+          {selectedProject !== "" && (
+            <List sx={{ width: "100%", bgcolor: "background.paper" }}>
+              <ListItem key={"add"} disablePadding>
+                <ListItemButton role={undefined} onClick={addTaskOnClick}>
+                  <ListItemIcon>
+                    <AddTaskIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                    id={"task-list-label-add"}
+                    primary={"Add a new task..."}
+                  />
+                </ListItemButton>
+              </ListItem>
+              {projectTasks.map((task) => {
+                const labelId = `task-list-label-${task.Key}`;
+
+                return (
+                  <ListItem
+                    key={task.Key}
+                    secondaryAction={
+                      <IconButton edge="end" aria-label="deletes" onClick={deleteTaskOnClick(task.Key)}>
+                        <DeleteForeverIcon />
+                      </IconButton>
+                    }
+                    disablePadding
+                  >
+                    <ListItemButton
+                      role={undefined}
+                      onClick={modTaskOnClick(task)}
+                    >
+                      <ListItemIcon>
+                        <TaskIcon />
+                      </ListItemIcon>
+                      <ListItemText
+                        id={labelId}
+                        primary={`${task.TaskTitle}`}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })}
+            </List>
+          )}
         </Card>
 
         <Card
@@ -378,7 +562,7 @@ const MainpageComponent = () => {
             boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
           }}
         >
-          <CardContent>            
+          <CardContent>
             <Typography
               style={{
                 position: "absolute",
@@ -392,41 +576,44 @@ const MainpageComponent = () => {
             >
               Team Member List
             </Typography>
-            </CardContent>
-          {showList && selectedProject !== "" && (<List
-            sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
-          >
-            {state.users.map((user) => {
-              const labelId = `checkbox-list-label-${user.Key}`;
+          </CardContent>
+          {showList && selectedProject !== "" && (
+            <List
+              sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
+            >
+              {state.users.map((user) => {
+                const labelId = `checkbox-list-label-${user.Key}`;
 
-              return (
-                <ListItem
-                  key={user.Key}
-                  disablePadding
-                >
-                  <ListItemButton
-                    role={undefined}
-                    onClick={handleToggle(user.Key)}
-                    dense
-                  >
-                    <ListItemIcon>
-                      <Checkbox
-                        edge="start"
-                        checked={projectUsers.find(pu => pu.User_id === user.Key) !== undefined}
-                        tabIndex={-1}
-                        disableRipple
-                        inputProps={{ "aria-labelledby": labelId }}
+                return (
+                  <ListItem key={user.Key} disablePadding>
+                    <ListItemButton
+                      role={undefined}
+                      onClick={handleToggle(user.Key)}
+                      dense
+                    >
+                      <ListItemIcon>
+                        <Checkbox
+                          edge="start"
+                          checked={
+                            projectUsers.find(
+                              (pu) => pu.User_id === user.Key
+                            ) !== undefined
+                          }
+                          tabIndex={-1}
+                          disableRipple
+                          inputProps={{ "aria-labelledby": labelId }}
+                        />
+                      </ListItemIcon>
+                      <ListItemText
+                        id={labelId}
+                        primary={`${user.FirstName} ${user.LastName}`}
                       />
-                    </ListItemIcon>
-                    <ListItemText
-                      id={labelId}
-                      primary={`${user.FirstName} ${user.LastName}`}
-                    />
-                  </ListItemButton>
-                </ListItem>
-              );
-            })}
-          </List>)}
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })}
+            </List>
+          )}
         </Card>
       </div>
 
@@ -537,6 +724,124 @@ const MainpageComponent = () => {
               right: 20,
             }}
             onClick={projectAddModalClose}
+          >
+            CLOSE
+          </Button>
+          <div>
+            <ToastContainer />
+          </div>
+        </div>
+      </Modal>
+
+      <Modal open={taskModalOpen} onClose={taskModalOnClose}>
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "60%",
+            height: "60%",
+            border: "1px solid black",
+            borderRadius: 5,
+            backgroundColor: "white",
+            overflow: "auto",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: theme.palette.primary.main,
+              padding: "10px",
+              borderTopLeftRadius: 5,
+              borderTopRightRadius: 5,
+              display: "flex",
+              justifyContent: "flex-start",
+              alignItems: "center",
+            }}
+          >
+            <Typography
+              style={{
+                fontWeight: "bold",
+                fontSize: 30,
+                color: "white",
+                marginRight: 10,
+                paddingLeft: 15,
+              }}
+            >
+              {taskModalTitle}
+            </Typography>
+          </div>
+
+          <div style={{ padding: 20 }}>
+            <TextField
+              label="Task"
+              variant="outlined"
+              fullWidth
+              multiline
+              rows={3}
+              margin="normal"
+              value={taskTitle}
+              onChange={taskTitletFieldOnChange}
+            />
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <TextField
+                label="Estimated time cost"
+                variant="outlined"
+                sx={{ width: "49%" }}
+                margin="normal"
+                value={taskEstCost}
+                onChange={taskEstCostTextFieldOnChange}
+              />
+              <TextField
+                label="Actual time cost"
+                variant="outlined"
+                sx={{ width: "49%" }}
+                margin="normal"
+                value={taskActCost}
+                onChange={taskActCostTextFieldOnChange}
+              />
+            </div>
+            <TextField
+              label="Description"
+              variant="outlined"
+              fullWidth
+              multiline
+              rows={7}
+              margin="normal"
+              value={taskDescription}
+              onChange={taskDesTextFieldOnChange}
+            />
+          </div>
+          <Button
+            variant="contained"
+            color="primary"
+            style={{
+              position: "absolute",
+              width: 88,
+              bottom: 10,
+              right: 127,
+            }}
+            onClick={handleTaskModalAction}
+            disabled={taskActionBtnDisabled}
+          >
+            {taskAction}
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            style={{
+              position: "absolute",
+              bottom: 10,
+              right: 20,
+            }}
+            onClick={taskModalOnClose}
           >
             CLOSE
           </Button>

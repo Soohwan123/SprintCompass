@@ -20,6 +20,10 @@ const resolvers = {
         let db = await dbRtns.getDBInstance();
         return await dbRtns.findAll(db, cfg.projects_usersCollection, { Project_id: ObjectId(args.Project_id) }, {});
     },
+    getproject_tasks: async (args) => {
+        let db = await dbRtns.getDBInstance();
+        return await dbRtns.findAll(db, cfg.tasksCollection, { Project_id: ObjectId(args.Project_id) }, {});
+    },
     adduser: async (args) => {
         let db = await dbRtns.getDBInstance();
         let user = {UniqueID: args.UniqueID,
@@ -57,6 +61,35 @@ const resolvers = {
         let db = await dbRtns.getDBInstance();
         let results = await dbRtns.deleteOne(db, cfg.projects_usersCollection, { _id: ObjectId(args._id) });
         return results.acknowledged ? "DELETED" : null;
-    }
+    },
+    addtask: async (args) => {
+        let db = await dbRtns.getDBInstance();
+        let task = {
+            Project_id: ObjectId(args.Project_id),
+            TaskTitle: args.TaskTitle,
+            EstimatedCost: args.EstimatedCost,
+            ActualCost: args.ActualCost,
+            Description: args.Description,
+            };
+        let results = await dbRtns.addOne(db, cfg.tasksCollection, task);
+        return results.acknowledged ? task : null;
+    },
+    updatetask: async (args) => {
+        let db = await dbRtns.getDBInstance();
+        let task = {
+            Project_id: ObjectId(args.Project_id),
+            TaskTitle: args.TaskTitle,
+            EstimatedCost: args.EstimatedCost,
+            ActualCost: args.ActualCost,
+            Description: args.Description,
+            };
+        let results = await dbRtns.updateOne(db, cfg.tasksCollection, { _id: ObjectId(args._id) }, task);
+        return results.ok === 1 ? "UPDATED" : null;
+    },
+    deletetask: async (args) => {
+        let db = await dbRtns.getDBInstance();
+        let results = await dbRtns.deleteOne(db, cfg.tasksCollection, { _id: ObjectId(args._id) });
+        return results.acknowledged ? "DELETED" : null;
+    },
 };
 export { resolvers };
