@@ -48,6 +48,7 @@ const MainpageComponent = () => {
   const initialInfoState = {
     projects: [],
     users: [],
+    numOfSprints: [],
   };
   //State for showing table
   const [showTable, setShowTable] = useState([]);
@@ -73,6 +74,7 @@ const MainpageComponent = () => {
   const [taskEstCost, setTaskEstCost] = useState("");
   const [taskActCost, setTaskActCost] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
+  const [taskSprintNumber, setTaskSprintNumber] = useState(0);
 
   const [selectedProject, setSelectedProject] = useState("");
   const [selectedTask, setSelectedTask] = useState("");
@@ -118,7 +120,7 @@ const MainpageComponent = () => {
       if (newProjects.length > 0) {
         setShowTable(true);
       }
-
+      
       setState({
         projects: newProjects,
       });
@@ -217,7 +219,7 @@ const MainpageComponent = () => {
       let newTasks = [];
       //fetching data
       let response = await customFetch(
-        `query { getproject_tasks(Project_id: "${Project_id}") {_id, Project_id, TaskTitle, EstimatedCost, ActualCost, Description}}`
+        `query { getproject_tasks(Project_id: "${Project_id}") {_id, Project_id, TaskTitle, EstimatedCost, ActualCost, Description, SprintNumber}}`
       );
       let json = await response.json();
 
@@ -231,6 +233,7 @@ const MainpageComponent = () => {
           EstimatedCost: t.EstimatedCost,
           ActualCost: t.ActualCost,
           Description: t.Description,
+          SprintNumber : t.SprintNumber,
         };
 
         newTasks.push(newT);
@@ -283,6 +286,17 @@ const MainpageComponent = () => {
     setTaskActionBtnDisabled(false);
   };
 
+  const taskSprintNumberTextFieldOnChange = (e, value) => {
+    const number = e.target.value;
+
+    if (/^\d+$/.test(number) && parseInt(number) <= state.numOfSprints.length) {
+      setTaskSprintNumber(number);
+      setTaskActionBtnDisabled(false);
+    } else {
+      toast.error('Please enter a valid integer value less than or equal to the number of sprints');
+    }
+  };
+
   const taskDesTextFieldOnChange = (e, value) => {
     setTaskDescription(e.target.value);
     setTaskActionBtnDisabled(false);
@@ -293,6 +307,20 @@ const MainpageComponent = () => {
     setSelectedProject(project.Key);
     LoadProjectUserList(project.Key);
     LoadProjectTaskList(project.Key);
+
+    let i = 1;
+    let numSprints = project.NumOfSprints;
+    let sprints = [];
+    while(numSprints != 0){
+      sprints.push(i);
+      i++;
+      numSprints--;
+    }
+
+    setState({
+      numOfSprints : sprints
+    });
+
   };
 
   const addTaskOnClick = (e, value) => {
@@ -302,6 +330,7 @@ const MainpageComponent = () => {
     setTaskEstCost("");
     setTaskActCost("");
     setTaskDescription("");
+    setTaskSprintNumber("");
     setTaskAction("ADD");
     setTaskActionBtnDisabled(true);
     taskModalOnOpen();
@@ -314,6 +343,7 @@ const MainpageComponent = () => {
     setTaskEstCost(task.EstimatedCost);
     setTaskActCost(task.ActualCost);
     setTaskDescription(task.Description);
+    setTaskSprintNumber(task.SprintNumber);
     setTaskAction("SAVE");
     setTaskActionBtnDisabled(true);
     taskModalOnOpen();
@@ -330,9 +360,12 @@ const MainpageComponent = () => {
              TaskTitle: "${taskTitle}",
              EstimatedCost: "${taskEstCost}"
              ActualCost: "${taskActCost}"
-             Description: "${taskDescription}") 
-            { Project_id, TaskTitle, EstimatedCost, ActualCost, Description } 
+             Description: "${taskDescription}"
+             SprintNumber: ${taskSprintNumber}) 
+            { Project_id, TaskTitle, EstimatedCost, ActualCost, Description, SprintNumber } 
           }`);
+
+        console.log(response);
       } else if (taskAction === "SAVE") {
         let response = await customFetch(`
           mutation { updatetask
@@ -341,8 +374,11 @@ const MainpageComponent = () => {
              TaskTitle: "${taskTitle}",
              EstimatedCost: "${taskEstCost}"
              ActualCost: "${taskActCost}"
-             Description: "${taskDescription}") 
+             Description: "${taskDescription}"
+             SprintNumber: ${taskSprintNumber}) 
           }`);
+
+          console.log(response);
       }
     } catch (error) {
       console.log(error);
@@ -519,34 +555,86 @@ const MainpageComponent = () => {
                   />
                 </ListItemButton>
               </ListItem>
-              {projectTasks.map((task) => {
-                const labelId = `task-list-label-${task.Key}`;
+              <List sx={{ width: "100%", bgcolor: "background.paper" }}>
+                <ListItem key={"backlog"} disablePadding>
+                    <ListItemText
+                      id={"task-list-label-backlog"}
+                      primary={"Product Backlog"}
+                    />
+                </ListItem>
+                {projectTasks.map((task) => {
+                  const labelId = `task-list-label-${task.Key}`;
+                  if(task.SprintNumber == 0 || task.SprintNumber == undefined){
+                    return (
+                      <ListItem
+                        key={task.Key}
+                        secondaryAction={
+                          <IconButton edge="end" aria-label="deletes" onClick={deleteTaskOnClick(task.Key)}>
+                            <DeleteForeverIcon />
+                          </IconButton>
+                        }
+                        disablePadding
+                      >
+                        <ListItemButton
+                          role={undefined}
+                          onClick={modTaskOnClick(task)}
+                        >
+                          <ListItemIcon>
+                            <TaskIcon />
+                          </ListItemIcon>
+                          <ListItemText
+                            id={labelId}
+                            primary={`${task.TaskTitle}`}
+                          />
+                        </ListItemButton>
+                      </ListItem>
+                    );
+                  }                
+                })}
+              </List>
 
-                return (
-                  <ListItem
-                    key={task.Key}
-                    secondaryAction={
-                      <IconButton edge="end" aria-label="deletes" onClick={deleteTaskOnClick(task.Key)}>
-                        <DeleteForeverIcon />
-                      </IconButton>
-                    }
-                    disablePadding
-                  >
-                    <ListItemButton
-                      role={undefined}
-                      onClick={modTaskOnClick(task)}
-                    >
-                      <ListItemIcon>
-                        <TaskIcon />
-                      </ListItemIcon>
-                      <ListItemText
-                        id={labelId}
-                        primary={`${task.TaskTitle}`}
-                      />
-                    </ListItemButton>
-                  </ListItem>
-                );
+              {state.numOfSprints.map((num) => {
+                  return (
+                    <List id={num} sx={{ width: "100%", bgcolor: "background.paper" }}>
+                      <ListItem key={`sprint${num}`} disablePadding>
+                          <ListItemText
+                            id={`task-list-label-sprint${num}`}
+                            primary={`Sprint ${num}`}
+                          />
+                      </ListItem>
+                      {projectTasks.map((task) => {
+                        const labelId = `task-list-label-${task.Key + `sprint${num}`}`;
+                        if(task.SprintNumber == num){
+                          return (
+                            <ListItem
+                              key={task.Key + `sprint${num}`}
+                              secondaryAction={
+                                <IconButton edge="end" aria-label="deletes" onClick={deleteTaskOnClick(task.Key)}>
+                                  <DeleteForeverIcon />
+                                </IconButton>
+                              }
+                              disablePadding
+                            >
+                              <ListItemButton
+                                role={undefined}
+                                onClick={modTaskOnClick(task)}
+                              >
+                                <ListItemIcon>
+                                  <TaskIcon />
+                                </ListItemIcon>
+                                <ListItemText
+                                  id={labelId}
+                                  primary={`${task.TaskTitle}`}
+                                />
+                              </ListItemButton>
+                            </ListItem>
+                          );
+                        }             
+                      })}
+                    </List>
+                  );
               })}
+              
             </List>
           )}
         </Card>
@@ -794,7 +882,7 @@ const MainpageComponent = () => {
               <TextField
                 label="Estimated time cost"
                 variant="outlined"
-                sx={{ width: "49%" }}
+                sx={{ width: "29%" }}
                 margin="normal"
                 value={taskEstCost}
                 onChange={taskEstCostTextFieldOnChange}
@@ -802,10 +890,20 @@ const MainpageComponent = () => {
               <TextField
                 label="Actual time cost"
                 variant="outlined"
-                sx={{ width: "49%" }}
+                sx={{ width: "29%" }}
                 margin="normal"
                 value={taskActCost}
                 onChange={taskActCostTextFieldOnChange}
+                
+              />
+
+              <TextField
+                label="Assigned Sprint"
+                variant="outlined"
+                sx={{ width: "29%" }}
+                margin="normal"
+                value={taskSprintNumber}
+                onChange={taskSprintNumberTextFieldOnChange}                
               />
             </div>
             <TextField
