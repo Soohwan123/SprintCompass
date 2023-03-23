@@ -40,6 +40,7 @@ type Mutation {
         EstimatedCost: String
         ActualCost: String
         Description: String
+        SprintNumber: Int
     ): Task
 
     updatetask(
@@ -49,6 +50,7 @@ type Mutation {
         EstimatedCost: String
         ActualCost: String
         Description: String
+        SprintNumber: Int
     ): String
 
     deletetask(
@@ -88,6 +90,7 @@ type Task {
     EstimatedCost: String
     ActualCost: String
     Description: String
+    SprintNumber: Int
 }
   
 `;
