@@ -71,6 +71,9 @@ const resolvers = {
             ActualCost: args.ActualCost,
             Description: args.Description,
             SprintNumber: args.SprintNumber,
+            AssigneeID : args.AssigneeID,
+            Status: args.Status,
+            TaskLog : args.TaskLog
             };
         let results = await dbRtns.addOne(db, cfg.tasksCollection, task);
         return results.acknowledged ? task : null;
@@ -84,6 +87,9 @@ const resolvers = {
             ActualCost: args.ActualCost,
             Description: args.Description,
             SprintNumber: args.SprintNumber,
+            AssigneeID : args.AssigneeID,
+            Status: args.Status,
+            TaskLog : args.TaskLog
             };
         let results = await dbRtns.updateOne(db, cfg.tasksCollection, { _id: ObjectId(args._id) }, task);
         return results.ok === 1 ? "UPDATED" : null;

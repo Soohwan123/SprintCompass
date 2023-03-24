@@ -41,6 +41,9 @@ type Mutation {
         ActualCost: String
         Description: String
         SprintNumber: Int
+        AssigneeID : String
+        Status: String
+        TaskLog : String
     ): Task
 
     updatetask(
@@ -51,6 +54,9 @@ type Mutation {
         ActualCost: String
         Description: String
         SprintNumber: Int
+        AssigneeID : String
+        Status: String
+        TaskLog : String
     ): String
 
     deletetask(
@@ -91,6 +97,9 @@ type Task {
     ActualCost: String
     Description: String
     SprintNumber: Int
+    AssigneeID : String
+    Status: String
+    TaskLog : String
 }
   
 `;
