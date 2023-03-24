@@ -24,6 +24,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
+import { InputLabel, MenuItem, Select } from "@mui/material";
 import CommentIcon from "@mui/icons-material/Comment";
 import TaskIcon from "@mui/icons-material/Task";
 import AddTaskIcon from "@mui/icons-material/AddTask";
@@ -49,6 +50,7 @@ const MainpageComponent = () => {
     projects: [],
     users: [],
     numOfSprints: [],
+    taskLogArray: []
   };
   //State for showing table
   const [showTable, setShowTable] = useState([]);
@@ -75,6 +77,9 @@ const MainpageComponent = () => {
   const [taskActCost, setTaskActCost] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
   const [taskSprintNumber, setTaskSprintNumber] = useState(0);
+  const [taskAssignee, setTaskAssignee] = useState("");
+  const [taskStatus, setTaskStatus] = useState("Ready");
+  const [taskLog, setTaskLog] = useState("");
 
   const [selectedProject, setSelectedProject] = useState("");
   const [selectedTask, setSelectedTask] = useState("");
@@ -219,7 +224,7 @@ const MainpageComponent = () => {
       let newTasks = [];
       //fetching data
       let response = await customFetch(
-        `query { getproject_tasks(Project_id: "${Project_id}") {_id, Project_id, TaskTitle, EstimatedCost, ActualCost, Description, SprintNumber}}`
+        `query { getproject_tasks(Project_id: "${Project_id}") {_id, Project_id, TaskTitle, EstimatedCost, ActualCost, Description, SprintNumber, AssigneeID, Status, TaskLog}}`
       );
       let json = await response.json();
 
@@ -234,6 +239,9 @@ const MainpageComponent = () => {
           ActualCost: t.ActualCost,
           Description: t.Description,
           SprintNumber : t.SprintNumber,
+          AssigneeID : t.AssigneeID,
+          Status : t.Status,
+          TaskLog: t.TaskLog
         };
 
         newTasks.push(newT);
@@ -287,7 +295,11 @@ const MainpageComponent = () => {
   };
 
   const taskSprintNumberTextFieldOnChange = (e, value) => {
-    const number = e.target.value;
+    let number = e.target.value;
+
+    if(number == undefined || number == ""){
+      number = 0;
+    }
 
     if (/^\d+$/.test(number) && parseInt(number) <= state.numOfSprints.length) {
       setTaskSprintNumber(number);
@@ -295,6 +307,37 @@ const MainpageComponent = () => {
     } else {
       toast.error('Please enter a valid integer value less than or equal to the number of sprints');
     }
+  };
+
+  const taskStatusOnChange = (event, value) => {
+    setTaskActionBtnDisabled(false);
+    setTaskStatus(event.target.value);
+
+    let userName = "";
+    state.users.map((user) => {
+      if(user.Key == taskAssignee){
+        userName += user.FirstName + " " + user.LastName;
+      }
+    });
+
+    const now = new Date();
+    const month = now.getMonth() + 1; // getMonth() returns 0-indexed month (0 = January)
+    const day = now.getDate();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+
+    const formattedDate = `${month.toString().padStart(2, "0")}/${day
+      .toString()
+      .padStart(2, "0")} ${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}`;
+    setTaskLog(`${taskLog}//${userName} changed status into ${taskStatus}                                       ${formattedDate}`);
+
+    //TODO - calculate actual time cost
+    setTaskActCost();
+
+    //-------
+    state.taskLogArray = taskLog.split('//');
   };
 
   const taskDesTextFieldOnChange = (e, value) => {
@@ -331,6 +374,9 @@ const MainpageComponent = () => {
     setTaskActCost("");
     setTaskDescription("");
     setTaskSprintNumber("");
+    setTaskAssignee("");
+    setTaskStatus("");
+    setTaskLog("");
     setTaskAction("ADD");
     setTaskActionBtnDisabled(true);
     taskModalOnOpen();
@@ -344,6 +390,9 @@ const MainpageComponent = () => {
     setTaskActCost(task.ActualCost);
     setTaskDescription(task.Description);
     setTaskSprintNumber(task.SprintNumber);
+    setTaskAssignee(task.AssigneeID);
+    setTaskStatus(task.Status);
+    setTaskLog(task.TaskLog);
     setTaskAction("SAVE");
     setTaskActionBtnDisabled(true);
     taskModalOnOpen();
@@ -361,8 +410,11 @@ const MainpageComponent = () => {
              EstimatedCost: "${taskEstCost}"
              ActualCost: "${taskActCost}"
              Description: "${taskDescription}"
-             SprintNumber: ${taskSprintNumber}) 
-            { Project_id, TaskTitle, EstimatedCost, ActualCost, Description, SprintNumber } 
+             SprintNumber: ${taskSprintNumber}
+             AssigneeID : "${taskAssignee}"
+             Status: "${taskStatus}"
+             TaskLog: "${taskLog}") 
+            { Project_id, TaskTitle, EstimatedCost, ActualCost, Description, SprintNumber, AssigneeID } 
           }`);
 
         console.log(response);
@@ -375,7 +427,10 @@ const MainpageComponent = () => {
              EstimatedCost: "${taskEstCost}"
              ActualCost: "${taskActCost}"
              Description: "${taskDescription}"
-             SprintNumber: ${taskSprintNumber}) 
+             SprintNumber: ${taskSprintNumber}
+             AssigneeID : "${taskAssignee}"
+             Status: "${taskStatus}"
+             TaskLog: "${taskLog}")
           }`);
 
           console.log(response);
@@ -626,6 +681,12 @@ const MainpageComponent = () => {
                                   id={labelId}
                                   primary={`${task.TaskTitle}`}
                                 />
+
+                                <Typography
+                                  sx={{ textAlign: "left", fontSize : 10}}
+                                >
+                                  Estimated hours - {task.EstimatedCost}
+                                </Typography>
                               </ListItemButton>
                             </ListItem>
                           );
@@ -880,17 +941,17 @@ const MainpageComponent = () => {
               }}
             >
               <TextField
-                label="Estimated time cost"
+                label="Estimated time cost(hours)"
                 variant="outlined"
-                sx={{ width: "29%" }}
+                sx={{ width: "19%" }}
                 margin="normal"
                 value={taskEstCost}
                 onChange={taskEstCostTextFieldOnChange}
               />
               <TextField
-                label="Actual time cost"
+                label="Actual time cost(hours)"
                 variant="outlined"
-                sx={{ width: "29%" }}
+                sx={{ width: "19%" }}
                 margin="normal"
                 value={taskActCost}
                 onChange={taskActCostTextFieldOnChange}
@@ -900,22 +961,91 @@ const MainpageComponent = () => {
               <TextField
                 label="Assigned Sprint"
                 variant="outlined"
-                sx={{ width: "29%" }}
+                sx={{ width: "19%" }}
                 margin="normal"
                 value={taskSprintNumber}
                 onChange={taskSprintNumberTextFieldOnChange}                
               />
+
+              <Select
+                label="Assigned Sprint"
+                variant="outlined"
+                sx={{ width: "19%" }}
+                margin="normal"
+                value={taskAssignee}
+                onChange={(event) => {
+                  setTaskAssignee(event.target.value);
+                  setTaskActionBtnDisabled(false);
+                }}
+              >
+                {projectUsers
+                  .filter((projectUser) =>
+                    state.users.some((user) => projectUser.User_id === user.Key)
+                  )
+                  .map((projectUser) => {
+                    const user = state.users.find((user) => user.Key === projectUser.User_id);
+                    return (
+                      <MenuItem key={projectUser.User_id} value={projectUser.User_id}>
+                        {user.FirstName} {user.LastName}
+                      </MenuItem>
+                    );
+                  })}
+              </Select>
+
+              <Select
+                label="Status"
+                variant="outlined"
+                sx={{ width: "19%" }}
+                margin="normal"
+                value={taskStatus}
+                onChange={taskStatusOnChange}
+              >
+                <MenuItem key="Ready" value="Ready">
+                  Ready
+                </MenuItem>
+                <MenuItem key="Development" value="Development">
+                  Development
+                </MenuItem>
+                <MenuItem key="Testing" value="Testing">
+                  Testing
+                </MenuItem>
+                <MenuItem key="Closed" value="Closed">
+                  Closed
+                </MenuItem>
+              </Select>
             </div>
-            <TextField
-              label="Description"
-              variant="outlined"
-              fullWidth
-              multiline
-              rows={7}
-              margin="normal"
-              value={taskDescription}
-              onChange={taskDesTextFieldOnChange}
-            />
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <TextField
+                label="Description"
+                variant="outlined"
+                sx={{ width: "50%" }}
+                multiline
+                rows={7}
+                margin="normal"
+                value={taskDescription}
+                onChange={taskDesTextFieldOnChange}
+              />
+              <Typography
+                   sx={{
+                    width: "50%",
+                    textAlign: "initial",
+                    verticalAlign: "top",
+                    overflow: "auto",
+                    maxHeight: "12em",
+                  }}
+               >
+                    {state.taskLogArray.map((log, index) => (
+                      <div key={index}>{log}</div>
+                    ))}
+              </Typography>
+            </div>
           </div>
           <Button
             variant="contained"
