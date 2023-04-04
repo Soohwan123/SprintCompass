@@ -15,5 +15,5 @@ _**This application is not mobile friendly yet!!**_
 
 --Sprint1 <br>
 --Sprint2 <br>
---Sprint3 (Ongoing)<br>
---v1 <br>
+--Sprint3 <br>
+--v1 <br> Now
