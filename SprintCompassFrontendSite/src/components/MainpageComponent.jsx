@@ -590,7 +590,7 @@ const MainpageComponent = () => {
             top: "45%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            backgroundColor: "#F0EFEF",
+            backgroundColor: "background.paper",
             minWidth: 350,
             boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
           }}
@@ -617,26 +617,26 @@ const MainpageComponent = () => {
                   <TextField
                       label="Project Name"
                       variant="outlined"
-                      fullWidth
+                      sx={{ width: "33%" }}
                       margin="normal"
                       value={selectedProjectDetails.ProjectName}
-                      onChange={ProjectNameTextFieldOnChange}
+                      disabled
                   />
                   <TextField
                       label="Number of Sprints"
                       variant="outlined"
-                      fullWidth
+                      sx={{ width: "33%" }}
                       margin="normal"
                       value={selectedProjectDetails.NumOfSprints}
-                      onChange={NumOfSprintsTextFieldOnChange}
+                      disabled
                   />
                   <TextField
                       label="Stacks Used"
                       variant="outlined"
-                      fullWidth
+                      sx={{ width: "33%" }}
                       margin="normal"
                       value={selectedProjectDetails.Stacks}
-                      onChange={StackTextFieldOnChange}
+                      disabled
                   />
                   </div>
                   <TextField
@@ -647,7 +647,7 @@ const MainpageComponent = () => {
                       rows={2}
                       margin="normal"
                       value={selectedProjectDetails.Description}
-                      onChange={DesTextFieldOnChange}
+                      disabled
                   />
 
                 </div>
