@@ -13,7 +13,7 @@ _**This application is not mobile friendly yet!!**_
 
 # VERSION
 
---Sprint1 (Ongoing)<br>
+--Sprint1 <br>
 --Sprint2 <br>
---Sprint3 <br>
+--Sprint3 (Ongoing)<br>
 --v1 <br>
