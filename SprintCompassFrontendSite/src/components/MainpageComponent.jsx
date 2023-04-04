@@ -85,6 +85,7 @@ const MainpageComponent = () => {
   const [taskLog, setTaskLog] = useState("");
 
   const [selectedProject, setSelectedProject] = useState("");
+  const [selectedProjectDetails, setSelectedProjectDetails] = useState({});
   const [selectedTask, setSelectedTask] = useState("");
   const [projectUsers, setProjectUsers] = useState([]);
   const [projectTasks, setProjectTasks] = useState([]);
@@ -353,6 +354,7 @@ const MainpageComponent = () => {
     setSelectedProject(project.Key);
     LoadProjectUserList(project.Key);
     LoadProjectTaskList(project.Key);
+    setSelectedProjectDetails(project);
 
     let i = 1;
     let numSprints = project.NumOfSprints;
@@ -594,7 +596,7 @@ const MainpageComponent = () => {
           }}
         >
           <FontAwesomeIcon
-            icon={faHandshake}
+            icon={faHandshake}          
             style={{
               color: theme.palette.primary.main,
               textAlign: "center",
@@ -603,8 +605,52 @@ const MainpageComponent = () => {
             }}
           />
           <Paper sx={{ overflow: "auto", height: "100%" }}>
-            {selectedProject !== "" && (
+            {selectedProject !== "" && (             
               <List sx={{ width: "100%", bgcolor: "background.paper" }}>
+                <div style={{ padding: 20 }}>
+                  <div style={{    
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'}}
+                  >
+                  <TextField
+                      label="Project Name"
+                      variant="outlined"
+                      fullWidth
+                      margin="normal"
+                      value={selectedProjectDetails.ProjectName}
+                      onChange={ProjectNameTextFieldOnChange}
+                  />
+                  <TextField
+                      label="Number of Sprints"
+                      variant="outlined"
+                      fullWidth
+                      margin="normal"
+                      value={selectedProjectDetails.NumOfSprints}
+                      onChange={NumOfSprintsTextFieldOnChange}
+                  />
+                  <TextField
+                      label="Stacks Used"
+                      variant="outlined"
+                      fullWidth
+                      margin="normal"
+                      value={selectedProjectDetails.Stacks}
+                      onChange={StackTextFieldOnChange}
+                  />
+                  </div>
+                  <TextField
+                      label="Description"
+                      variant="outlined"
+                      fullWidth
+                      multiline
+                      rows={2}
+                      margin="normal"
+                      value={selectedProjectDetails.Description}
+                      onChange={DesTextFieldOnChange}
+                  />
+
+                </div>
                 <ListItem key={"add"} disablePadding>
                   <ListItemButton role={undefined} onClick={addTaskOnClick}>
                     <ListItemIcon>
