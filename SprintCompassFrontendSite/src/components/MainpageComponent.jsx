@@ -25,10 +25,13 @@ import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
 import { InputLabel, MenuItem, Select } from "@mui/material";
-import CommentIcon from "@mui/icons-material/Comment";
-import TaskIcon from "@mui/icons-material/Task";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
+import AdbIcon from '@mui/icons-material/Adb';
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import FolderIcon from "@mui/icons-material/Folder";
 
 import theme from "../theme";
 import customFetch from "../utilities/utility";
@@ -50,7 +53,7 @@ const MainpageComponent = () => {
     projects: [],
     users: [],
     numOfSprints: [],
-    taskLogArray: []
+    taskLogArray: [],
   };
   //State for showing table
   const [showTable, setShowTable] = useState([]);
@@ -125,7 +128,7 @@ const MainpageComponent = () => {
       if (newProjects.length > 0) {
         setShowTable(true);
       }
-      
+
       setState({
         projects: newProjects,
       });
@@ -238,10 +241,10 @@ const MainpageComponent = () => {
           EstimatedCost: t.EstimatedCost,
           ActualCost: t.ActualCost,
           Description: t.Description,
-          SprintNumber : t.SprintNumber,
-          AssigneeID : t.AssigneeID,
-          Status : t.Status,
-          TaskLog: t.TaskLog
+          SprintNumber: t.SprintNumber,
+          AssigneeID: t.AssigneeID,
+          Status: t.Status,
+          TaskLog: t.TaskLog,
         };
 
         newTasks.push(newT);
@@ -297,7 +300,7 @@ const MainpageComponent = () => {
   const taskSprintNumberTextFieldOnChange = (e, value) => {
     let number = e.target.value;
 
-    if(number == undefined || number == ""){
+    if (number == undefined || number == "") {
       number = 0;
     }
 
@@ -305,7 +308,9 @@ const MainpageComponent = () => {
       setTaskSprintNumber(number);
       setTaskActionBtnDisabled(false);
     } else {
-      toast.error('Please enter a valid integer value less than or equal to the number of sprints');
+      toast.error(
+        "Please enter a valid integer value less than or equal to the number of sprints"
+      );
     }
   };
 
@@ -315,7 +320,7 @@ const MainpageComponent = () => {
 
     let userName = "";
     state.users.map((user) => {
-      if(user.Key == taskAssignee){
+      if (user.Key == taskAssignee) {
         userName += user.FirstName + " " + user.LastName;
       }
     });
@@ -331,13 +336,15 @@ const MainpageComponent = () => {
       .padStart(2, "0")} ${hours.toString().padStart(2, "0")}:${minutes
       .toString()
       .padStart(2, "0")}`;
-    setTaskLog(`${taskLog}//${userName} changed status into ${taskStatus}                                       ${formattedDate}`);
+    setTaskLog(
+      `${taskLog}//${userName} changed status into ${taskStatus}                                       ${formattedDate}`
+    );
 
     //TODO - calculate actual time cost
     setTaskActCost();
 
     //-------
-    state.taskLogArray = taskLog.split('//');
+    state.taskLogArray = taskLog.split("//");
   };
 
   const taskDesTextFieldOnChange = (e, value) => {
@@ -354,16 +361,15 @@ const MainpageComponent = () => {
     let i = 1;
     let numSprints = project.NumOfSprints;
     let sprints = [];
-    while(numSprints != 0){
+    while (numSprints != 0) {
       sprints.push(i);
       i++;
       numSprints--;
     }
 
     setState({
-      numOfSprints : sprints
+      numOfSprints: sprints,
     });
-
   };
 
   const addTaskOnClick = (e, value) => {
@@ -433,7 +439,7 @@ const MainpageComponent = () => {
              TaskLog: "${taskLog}")
           }`);
 
-          console.log(response);
+        console.log(response);
       }
     } catch (error) {
       console.log(error);
@@ -443,7 +449,7 @@ const MainpageComponent = () => {
   };
 
   const deleteTaskOnClick = (task_id) => async () => {
-    try{
+    try {
       let response = await customFetch(
         `mutation { deletetask(_id: "${task_id}") }`
       );
@@ -596,75 +602,110 @@ const MainpageComponent = () => {
               marginTop: 30,
             }}
           />
-          <CardContent></CardContent>
-          {selectedProject !== "" && (
-            <List sx={{ width: "100%", bgcolor: "background.paper" }}>
-              <ListItem key={"add"} disablePadding>
-                <ListItemButton role={undefined} onClick={addTaskOnClick}>
-                  <ListItemIcon>
-                    <AddTaskIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    id={"task-list-label-add"}
-                    primary={"Add a new task..."}
-                  />
-                </ListItemButton>
-              </ListItem>
+          <Paper sx={{ overflow: "auto", height: "100%" }}>
+            {selectedProject !== "" && (
               <List sx={{ width: "100%", bgcolor: "background.paper" }}>
-                <ListItem key={"backlog"} disablePadding>
+                <ListItem key={"add"} disablePadding>
+                  <ListItemButton role={undefined} onClick={addTaskOnClick}>
+                    <ListItemIcon>
+                      <AddTaskIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      id={"task-list-label-add"}
+                      primary={"Add a new task..."}
+                    />
+                  </ListItemButton>
+                </ListItem>
+                <List sx={{ width: "100%", bgcolor: "background.paper" }}>
+                  <ListItem key={"backlog"}>
+                    <ListItemIcon>
+                      <FolderIcon />
+                    </ListItemIcon>
                     <ListItemText
                       id={"task-list-label-backlog"}
                       primary={"Product Backlog"}
                     />
-                </ListItem>
-                {projectTasks.map((task) => {
-                  const labelId = `task-list-label-${task.Key}`;
-                  if(task.SprintNumber == 0 || task.SprintNumber == undefined){
-                    return (
-                      <ListItem
-                        key={task.Key}
-                        secondaryAction={
-                          <IconButton edge="end" aria-label="deletes" onClick={deleteTaskOnClick(task.Key)}>
-                            <DeleteForeverIcon />
-                          </IconButton>
-                        }
-                        disablePadding
-                      >
-                        <ListItemButton
-                          role={undefined}
-                          onClick={modTaskOnClick(task)}
+                  </ListItem>
+                  {projectTasks.map((task) => {
+                    const labelId = `task-list-label-${task.Key}`;
+                    if (
+                      task.SprintNumber == 0 ||
+                      task.SprintNumber == undefined
+                    ) {
+                      return (
+                        <ListItem
+                          key={task.Key}
+                          secondaryAction={
+                            <IconButton
+                              edge="end"
+                              aria-label="deletes"
+                              onClick={deleteTaskOnClick(task.Key)}
+                            >
+                              <DeleteForeverIcon />
+                            </IconButton>
+                          }
+                          disablePadding
                         >
-                          <ListItemIcon>
-                            <TaskIcon />
-                          </ListItemIcon>
-                          <ListItemText
-                            id={labelId}
-                            primary={`${task.TaskTitle}`}
-                          />
-                        </ListItemButton>
-                      </ListItem>
-                    );
-                  }                
-                })}
-              </List>
+                          <ListItemButton
+                            role={undefined}
+                            onClick={modTaskOnClick(task)}
+                            sx={{
+                              pl: 8,
+                              borderBottom: 1,
+                              borderColor: "lightgray",
+                            }}
+                          >
+                            <ListItemIcon>
+                              {task.Status == "Closed" ? (
+                                <AssignmentTurnedInIcon />
+                              ) : task.Status == "Testing" ? (
+                                <AdbIcon />
+                              ) : task.Status == "Development" ? (
+                                <AssignmentIndIcon />
+                              ) : (
+                                <AssignmentIcon />
+                              )}
+                            </ListItemIcon>
+                            <ListItemText
+                              id={labelId}
+                              primary={`${task.TaskTitle}`}
+                            />
+                          </ListItemButton>
+                        </ListItem>
+                      );
+                    }
+                  })}
+                </List>
 
-              {state.numOfSprints.map((num) => {
+                {state.numOfSprints.map((num) => {
                   return (
-                    <List id={num} sx={{ width: "100%", bgcolor: "background.paper" }}>
-                      <ListItem key={`sprint${num}`} disablePadding>
-                          <ListItemText
-                            id={`task-list-label-sprint${num}`}
-                            primary={`Sprint ${num}`}
-                          />
+                    <List
+                      id={num}
+                      sx={{ width: "100%", bgcolor: "background.paper" }}
+                    >
+                      <ListItem key={`sprint${num}`}>
+                        <ListItemIcon>
+                          <FolderIcon />
+                        </ListItemIcon>
+                        <ListItemText
+                          id={`task-list-label-sprint${num}`}
+                          primary={`Sprint ${num}`}
+                        />
                       </ListItem>
                       {projectTasks.map((task) => {
-                        const labelId = `task-list-label-${task.Key + `sprint${num}`}`;
-                        if(task.SprintNumber == num){
+                        const labelId = `task-list-label-${
+                          task.Key + `sprint${num}`
+                        }`;
+                        if (task.SprintNumber == num) {
                           return (
                             <ListItem
                               key={task.Key + `sprint${num}`}
                               secondaryAction={
-                                <IconButton edge="end" aria-label="deletes" onClick={deleteTaskOnClick(task.Key)}>
+                                <IconButton
+                                  edge="end"
+                                  aria-label="deletes"
+                                  onClick={deleteTaskOnClick(task.Key)}
+                                >
                                   <DeleteForeverIcon />
                                 </IconButton>
                               }
@@ -673,9 +714,22 @@ const MainpageComponent = () => {
                               <ListItemButton
                                 role={undefined}
                                 onClick={modTaskOnClick(task)}
+                                sx={{
+                                  pl: 8,
+                                  borderBottom: 1,
+                                  borderColor: "lightgray",
+                                }}
                               >
                                 <ListItemIcon>
-                                  <TaskIcon />
+                                  {task.Status == "Closed" ? (
+                                    <AssignmentTurnedInIcon />
+                                  ) : task.Status == "Testing" ? (
+                                    <AdbIcon />
+                                  ) : task.Status == "Development" ? (
+                                    <AssignmentIndIcon />
+                                  ) : (
+                                    <AssignmentIcon />
+                                  )}
                                 </ListItemIcon>
                                 <ListItemText
                                   id={labelId}
@@ -683,21 +737,21 @@ const MainpageComponent = () => {
                                 />
 
                                 <Typography
-                                  sx={{ textAlign: "left", fontSize : 10}}
+                                  sx={{ textAlign: "left", fontSize: 10 }}
                                 >
                                   Estimated hours - {task.EstimatedCost}
                                 </Typography>
                               </ListItemButton>
                             </ListItem>
                           );
-                        }             
+                        }
                       })}
                     </List>
                   );
-              })}
-              
-            </List>
-          )}
+                })}
+              </List>
+            )}
+          </Paper>
         </Card>
 
         <Card
@@ -955,7 +1009,6 @@ const MainpageComponent = () => {
                 margin="normal"
                 value={taskActCost}
                 onChange={taskActCostTextFieldOnChange}
-                
               />
 
               <TextField
@@ -964,7 +1017,7 @@ const MainpageComponent = () => {
                 sx={{ width: "19%" }}
                 margin="normal"
                 value={taskSprintNumber}
-                onChange={taskSprintNumberTextFieldOnChange}                
+                onChange={taskSprintNumberTextFieldOnChange}
               />
 
               <Select
@@ -983,9 +1036,14 @@ const MainpageComponent = () => {
                     state.users.some((user) => projectUser.User_id === user.Key)
                   )
                   .map((projectUser) => {
-                    const user = state.users.find((user) => user.Key === projectUser.User_id);
+                    const user = state.users.find(
+                      (user) => user.Key === projectUser.User_id
+                    );
                     return (
-                      <MenuItem key={projectUser.User_id} value={projectUser.User_id}>
+                      <MenuItem
+                        key={projectUser.User_id}
+                        value={projectUser.User_id}
+                      >
                         {user.FirstName} {user.LastName}
                       </MenuItem>
                     );
@@ -1033,17 +1091,17 @@ const MainpageComponent = () => {
                 onChange={taskDesTextFieldOnChange}
               />
               <Typography
-                   sx={{
-                    width: "50%",
-                    textAlign: "initial",
-                    verticalAlign: "top",
-                    overflow: "auto",
-                    maxHeight: "12em",
-                  }}
-               >
-                    {state.taskLogArray.map((log, index) => (
-                      <div key={index}>{log}</div>
-                    ))}
+                sx={{
+                  width: "50%",
+                  textAlign: "initial",
+                  verticalAlign: "top",
+                  overflow: "auto",
+                  maxHeight: "12em",
+                }}
+              >
+                {state.taskLogArray.map((log, index) => (
+                  <div key={index}>{log}</div>
+                ))}
               </Typography>
             </div>
           </div>
