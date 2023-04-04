@@ -337,13 +337,9 @@ const MainpageComponent = () => {
       .toString()
       .padStart(2, "0")}`;
     setTaskLog(
-      `${taskLog}//${userName} changed status into ${taskStatus}                                       ${formattedDate}`
+      `${taskLog}//${userName} changed status from ${event.target.value}                                       ${formattedDate}`
     );
 
-    //TODO - calculate actual time cost
-    setTaskActCost();
-
-    //-------
     state.taskLogArray = taskLog.split("//");
   };
 
@@ -384,6 +380,9 @@ const MainpageComponent = () => {
     setTaskStatus("");
     setTaskLog("");
     setTaskAction("ADD");
+    setState({
+      taskLogArray : []
+    });
     setTaskActionBtnDisabled(true);
     taskModalOnOpen();
   };
@@ -399,6 +398,7 @@ const MainpageComponent = () => {
     setTaskAssignee(task.AssigneeID);
     setTaskStatus(task.Status);
     setTaskLog(task.TaskLog);
+    state.taskLogArray = task.TaskLog.split("//");
     setTaskAction("SAVE");
     setTaskActionBtnDisabled(true);
     taskModalOnOpen();
